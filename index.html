@@ -1,0 +1,98 @@
+<script>
+    var events = [];
+    var discs = [0, 3, 0, 0];
+    var move = function (disc, src, dst) {
+        events.push({
+            event: 'move',
+            disc: disc,
+            src: src,
+            dst: dst
+        });
+    };
+
+    var animateUp = function (disc, src) {
+        for (i = 4; i > discs[src]; i--) {
+            events.unshift({
+                event: 'draw',
+                disc: disc,
+                x: src,
+                y: 4 - i
+            });
+        }
+    };
+
+    var animateDown = function (disc, src) {
+        for (i = discs[src] + 1; i < 4; i++) {
+            events.unshift({
+                event: 'draw',
+                disc: disc,
+                x: src,
+                y: 4 - i
+            });
+        }
+    };
+
+    var animateMove = function (disc, src, dst) {
+        var sign = src > dst ? 1 : -1;
+        for (i = dst; i !== src; i += sign) {
+            events.unshift({
+                event: 'draw',
+                disc: disc,
+                x: i,
+                y: 0
+            });
+        }
+    };
+
+    var shiftx = [35, 20, 5];
+    var dispatchMessages = function () {
+        if (events.length > 0) {
+            e = events.shift();
+            if (e.event === 'move') {
+                animateDown(e.disc, e.dst);
+                animateMove(e.disc, e.src, e.dst);
+                animateUp(e.disc, e.src);
+                discs[e.src]--;
+                discs[e.dst]++;
+            } else if (e.event === 'draw') {
+                document.getElementById('disc' + e.disc).style.left = shiftx[e.disc - 1] + (e.x - 1) * 85 + 'px';
+                document.getElementById('disc' + e.disc).style.top = -110 + (e.y - e.disc) * 15 + 'px';
+            }
+            setTimeout(dispatchMessages, 250);
+        }
+    };
+
+    var hanoi = function (disc, src, aux, dst) {
+        if (disc > 0) {
+            hanoi(disc - 1, src, dst, aux);
+            move(disc, src, dst);
+            hanoi(disc - 1, aux, src, dst);
+        }
+    };
+
+    hanoi(3, 1, 2, 3);
+
+    document.writeln(
+        '<div id="hanoi" style="width:270px;height:70px;background-color:black;color:white;padding:0px;margin:0px;border:0px;">'
+        );
+    document.writeln(
+        '<div id="aux1" style="width:10px;height:45px;position:relative;top:25px;left:45px;background-color:brown;"></div>'
+        );
+    document.writeln(
+        '<div id="aux2" style="width:10px;height:45px;position:relative;top:-20px;left:130px;background-color:brown;"></div>'
+        );
+    document.writeln(
+        '<div id="aux3" style="width:10px;height:45px;position:relative;top:-65px;left:215px;background-color:brown;"></div>'
+        );
+    document.writeln(
+        '<div id="disc1" style="width:30px;height:15px;position:relative;top:-110px;left:35px;background-color:red;"></div>'
+        );
+    document.writeln(
+        '<div id="disc2" style="width:60px;height:15px;position:relative;top:-110px;left:20px;background-color:yellow;"></div>'
+        );
+    document.writeln(
+        '<div id="disc3" style="width:90px;height:15px;position:relative;top:-110px;left:5px;background-color:green;"></div>'
+        );
+    document.writeln('</div>');
+    dispatchMessages();
+</script>
